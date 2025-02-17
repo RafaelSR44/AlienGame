@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Exercício do Alien</title>
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+  </style>
+</head>
+
+<body>
+  <script>
+    // o que acontece aqui?
+    // Aqui declaramos variaveis para determinar parte da config
+    const larguraJogo = 700;
+    const alturaJogo = 850;
+    const gravidade = 350;
+
+    // o que essa parte faz?
+    // Aqui configuramos o display e as cenas do jogo
+    const config = {
+      type: Phaser.AUTO,
+      width: larguraJogo,
+      height: alturaJogo,
+
+      // ativivando a física no jogo
+      physics: {
+        default: 'arcade',
+        arcade: {
+          gravity: { y: gravidade },
+          debug: true
+        }
+      },
+
+      scene: {
+        preload: preload,
+        create: create,
+        update: update
+      }
+    };
+
+    // o que acontece aqui?
+    // aqui atribuimos ao jogo em si, com a "config" sendo passada como parametro
+    const game = new Phaser.Game(config);
+    var alien; //criando o player
+    var teclado; //variavel para o controle do personagem
+    var fogo; //variavel para o turbo
+    var plataforma; //variavel para a plataforma
+    var moeda; //variavel para a moeda
+    var pontuacao = 0; //variavel para a pontuação
+    var placar; //variavel para o placar
+
+
+    // o que acontece aqui?
+    // aqui carregamos o a os assets necessarios para o jogo
+    function preload() {
+      this.load.image('background', 'assets/bg.png');
+      this.load.image('player', 'assets/alienigena.png');//setando o asset para o player
+      this.load.image('turbo_nave', 'assets/turbo.png');// asset para o turbo
+      this.load.image('plataforma_tijolo', 'assets/tijolos.png');// asset para a plataforma
+      this.load.image('moeda', 'assets/moeda.png');// asset para o moeda
+    }
+
+    function create() {
+      // o que acontece aqui?
+      // aqui posicionamos a imagem de fundo no meio do display do jogo
+      this.add.image(larguraJogo / 2, alturaJogo / 2, 'background');
+
+      //adição do turbo
+      fogo = this.add.sprite(0, 0, 'turbo_nave');
+      fogo.setVisible(false);
+
+      // posicionando o player na tela
+      alien = this.physics.add.sprite(larguraJogo / 2, 0, 'player');
+      alien.setCollideWorldBounds(true);
+      //alien.body.setSize(20, 40, true) função para editar a area de colisão
+
+      // o que acontece aqui?
+      // aqui criamos um grupo de teclas para controlar o player
+      teclado = this.input.keyboard.createCursorKeys();
+
+      //criando a plataforma
+      plataforma = this.physics.add.staticImage(larguraJogo / 2, alturaJogo / 2, 'plataforma_tijolo');
+      this.physics.add.collider(alien, plataforma);
+
+      //criando a moeda
+      moeda = this.physics.add.sprite(larguraJogo / 2, 0, 'moeda');
+      moeda.setCollideWorldBounds(true);
+      moeda.setBounce(0.7);
+      this.physics.add.collider(moeda, plataforma);
+    }
+
+    function update() {
+      // o que acontece aqui?
+      // aqui verificamos se as teclas de movimento para esquerda ou para baixo estão sendo pressionadas
+      if (teclado.left.isDown) {
+        alien.setVelocityX(-160);
+      }
+      else if (teclado.right.isDown) {
+        alien.setVelocityX(160);
+      }
+      else {
+        alien.setVelocityX(0);
+      }
+
+      // o que acontece aqui?
+      // aqui verificamos se as teclas de movimento para cima ou para baixo estão sendo pressionadas
+      if (teclado.up.isDown) {
+        alien.setVelocityY(-160);
+        ativarTurbo();
+      }
+      else {
+        desativarTurbo();
+      }
+
+      fogo.setPosition(alien.x, alien.y + alien.height / 2);
+
+    }
+
+    function ativarTurbo() {
+      fogo.setVisible(true);
+    }
+
+    function desativarTurbo() {
+      fogo.setVisible(false);
+    }
+  </script>
+</body>
+
+</html>
