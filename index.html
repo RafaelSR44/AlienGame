@@ -58,6 +58,8 @@
     var moeda; //variavel para a moeda
     var pontuacao = 0; //variavel para a pontuação
     var placar; //variavel para o placar
+    var tiro; //variavel para o tiro
+    var inimigo; //variavel para o inimigo
 
 
     // o que acontece aqui?
@@ -68,12 +70,19 @@
       this.load.image('turbo_nave', 'assets/turbo.png');// asset para o turbo
       this.load.image('plataforma_tijolo', 'assets/tijolos.png');// asset para a plataforma
       this.load.image('moeda', 'assets/moeda.png');// asset para o moeda
+      this.load.image('inimigo', 'assets/inimigo.png');// asset para o inimigo
+      this.load.image('tiro', 'assets/projetil.png');// asset para o tiro
     }
 
     function create() {
       // o que acontece aqui?
       // aqui posicionamos a imagem de fundo no meio do display do jogo
       this.add.image(larguraJogo / 2, alturaJogo / 2, 'background');
+
+      //criando o tiro
+      tiro = this.physics.add.sprite(0, 0, 'tiro');
+      tiro.setVisible(false);
+      tiro.body.setAllowGravity(false);
 
       //adição do turbo
       fogo = this.add.sprite(0, 0, 'turbo_nave');
@@ -97,6 +106,22 @@
       moeda.setCollideWorldBounds(true);
       moeda.setBounce(0.7);
       this.physics.add.collider(moeda, plataforma);
+
+      // adicionando placar 
+      placar = this.add.text(50, 50, 'Moedas:' + pontuacao, { fontSize: '45px', fill: '#495613' });
+
+      // quando o player colidir com a moeda
+      this.physics.add.overlap(alien, moeda, function(){
+        moeda.setVisible(false); //esconde a moeda
+
+        var posicaoMoeda_Y = Phaser.Math.RND.between(50, 650); //gera uma posição aleatória para a moeda
+        moeda.setPosition( posicaoMoeda_Y, 100); //posiciona a moeda em uma posição aleatória
+
+        pontuacao++; //incrementa a pontuação
+        placar.setText('Moedas:' + pontuacao); //atualiza o placar
+
+        moeda.setVisible(true);//mostra a moeda nova
+      });
     }
 
     function update() {
@@ -122,7 +147,25 @@
         desativarTurbo();
       }
 
-      fogo.setPosition(alien.x, alien.y + alien.height / 2);
+      fogo.setPosition(alien.x, alien.y + alien.height / 2); //posiciona o turbo no player
+
+      if (teclado.space.isDown && !tiro.visible && teclado.left.isDown) {
+        tiro.setPosition(alien.x, alien.y);
+        atirar();
+        tiro.setVelocityX(-100);
+      } else if (teclado.space.isDown && !tiro.visible && teclado.right.isDown) {
+        tiro.setPosition(alien.x, alien.y);
+        atirar();
+        tiro.setVelocityX(100);
+      } else if (teclado.space.isDown && !tiro.visible) {
+        tiro.setPosition(alien.x, alien.y);
+        atirar();
+        tiro.setVelocityY(-450);
+      } 
+
+      if( tiro.x < 0 || tiro.x > larguraJogo || tiro.y < 0 || tiro.y > alturaJogo){
+        desativarTiro();
+      }
 
     }
 
@@ -132,6 +175,14 @@
 
     function desativarTurbo() {
       fogo.setVisible(false);
+    }
+
+    function atirar() {
+      tiro.setVisible(true);
+    }
+
+    function desativarTiro() {
+      tiro.setVisible(false);
     }
   </script>
 </body>
