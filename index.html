@@ -59,7 +59,8 @@
     var pontuacao = 0; //variavel para a pontuação
     var placar; //variavel para o placar
     var tiro; //variavel para o tiro
-    var inimigo; //variavel para o inimigo
+    var inimigos; //variavel para os inimigos
+    var gameOver = false; //variavel para o game over
 
 
     // o que acontece aqui?
@@ -72,6 +73,7 @@
       this.load.image('moeda', 'assets/moeda.png');// asset para o moeda
       this.load.image('inimigo', 'assets/inimigo.png');// asset para o inimigo
       this.load.image('tiro', 'assets/projetil.png');// asset para o tiro
+      this.load.image('gameover', 'assets/gameover.png');// asset para o game over
     }
 
     function create() {
@@ -107,25 +109,54 @@
       moeda.setBounce(0.7);
       this.physics.add.collider(moeda, plataforma);
 
+      //criando o inimigo
+      inimigos = this.physics.add.sprite(larguraJogo / 4, alturaJogo / 2, 'inimigo');
+      inimigos.setCollideWorldBounds(true);
+      this.physics.add.collider(inimigos, plataforma);
+      inimigos.body.setAllowGravity(false);
+
       // adicionando placar 
       placar = this.add.text(50, 50, 'Moedas:' + pontuacao, { fontSize: '45px', fill: '#495613' });
 
       // quando o player colidir com a moeda
-      this.physics.add.overlap(alien, moeda, function(){
+      this.physics.add.overlap(alien, moeda, function () {
         moeda.setVisible(false); //esconde a moeda
 
         var posicaoMoeda_Y = Phaser.Math.RND.between(50, 650); //gera uma posição aleatória para a moeda
-        moeda.setPosition( posicaoMoeda_Y, 100); //posiciona a moeda em uma posição aleatória
+        moeda.setPosition(posicaoMoeda_Y, 100); //posiciona a moeda em uma posição aleatória
 
         pontuacao++; //incrementa a pontuação
         placar.setText('Moedas:' + pontuacao); //atualiza o placar
 
         moeda.setVisible(true);//mostra a moeda nova
       });
+
+      // quando o inimigo colidir com o tiro
+      this.physics.add.overlap(tiro, inimigos, function () {
+        inimigos.setVisible(false); //esconde o inimigo
+        inimigos.setPosition(Phaser.Math.RND.between(50, 650), Phaser.Math.RND.between(50, 650)); //posiciona o inimigo em uma posição aleatória
+        inimigos.setVisible(true); //mostra o inimigo
+        desativarTiro(); //desativa o tiro
+      });
+
+      // quando o player colidir com o inimigo
+      this.physics.add.overlap(alien, inimigos, function (alien, inimigo) {
+        alien.setTint(0xff0000); //esconde o player
+        inimigo.setVisible(false); //esconde o inimigo
+        moeda.setVisible(false); //esconde a moeda
+        gameOver = true;
+        this.add.image(larguraJogo / 2, alturaJogo / 2, 'gameover'); //ativa o game over
+      }, null, this); // o null é para não passar nenhum objeto e o this é para referenciar a cena
     }
 
     function update() {
-      // o que acontece aqui?
+
+      // aqui verificamos se o jogo acabou
+      if (gameOver) {
+        this.physics.pause(); // pausa o jogo
+        return;
+      }
+
       // aqui verificamos se as teclas de movimento para esquerda ou para baixo estão sendo pressionadas
       if (teclado.left.isDown) {
         alien.setVelocityX(-160);
@@ -138,7 +169,7 @@
       }
 
       // o que acontece aqui?
-      // aqui verificamos se as teclas de movimento para cima ou para baixo estão sendo pressionadas
+      // aqui verificamos se as teclas de movimento para cima está sendo pressionadas
       if (teclado.up.isDown) {
         alien.setVelocityY(-160);
         ativarTurbo();
@@ -149,40 +180,62 @@
 
       fogo.setPosition(alien.x, alien.y + alien.height / 2); //posiciona o turbo no player
 
+      // aqui verificamos se a tecla de espaço está sendo pressionada e se o tiro não está visível
+      // e se a tecla de movimento para esquerda está sendo pressionada
       if (teclado.space.isDown && !tiro.visible && teclado.left.isDown) {
         tiro.setPosition(alien.x, alien.y);
         atirar();
-        tiro.setVelocityX(-100);
+        tiro.setVelocityX(-450);
       } else if (teclado.space.isDown && !tiro.visible && teclado.right.isDown) {
         tiro.setPosition(alien.x, alien.y);
         atirar();
-        tiro.setVelocityX(100);
+        tiro.setVelocityX(450);
       } else if (teclado.space.isDown && !tiro.visible) {
         tiro.setPosition(alien.x, alien.y);
         atirar();
         tiro.setVelocityY(-450);
-      } 
+      }
 
-      if( tiro.x < 0 || tiro.x > larguraJogo || tiro.y < 0 || tiro.y > alturaJogo){
+      // aqui verificamos se o tiro saiu da tela
+      if (tiro.x < 0 || tiro.x > larguraJogo || tiro.y < 0 || tiro.y > alturaJogo) {
         desativarTiro();
+      }
+
+      // aqui verificamos se o inimigo está perto do player no eixo x, com isso ele em direção ao player
+      if (inimigos.x < alien.x) {
+        inimigos.setVelocityX(50);
+      } else {
+        inimigos.setVelocityX(-50);
+      }
+
+      // aqui verificamos se o inimigo está perto do player no eixo y, com isso ele em direção ao player
+      if (inimigos.y < alien.y) {
+        inimigos.setVelocityY(50);
+      } else {
+        inimigos.setVelocityY(-50);
       }
 
     }
 
+    // funções para ativar e desativar o turbo
     function ativarTurbo() {
-      fogo.setVisible(true);
+      fogo.setVisible(true); 
     }
 
     function desativarTurbo() {
       fogo.setVisible(false);
     }
 
+    // funções para ativar e desativar o tiro
     function atirar() {
       tiro.setVisible(true);
     }
 
     function desativarTiro() {
-      tiro.setVisible(false);
+      tiro.setVisible(false); //esconde o tiro
+      tiro.setVelocityX(0); //zera a velocidade do tiro no eixo x
+      tiro.setVelocityY(0); //zera a velocidade do tiro no eixo y
+      tiro.setPosition(0, 0); //posiciona o tiro fora da tela
     }
   </script>
 </body>
