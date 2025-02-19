@@ -219,7 +219,7 @@
 
     // funções para ativar e desativar o turbo
     function ativarTurbo() {
-      fogo.setVisible(true); 
+      fogo.setVisible(true);
     }
 
     function desativarTurbo() {
@@ -236,6 +236,25 @@
       tiro.setVelocityX(0); //zera a velocidade do tiro no eixo x
       tiro.setVelocityY(0); //zera a velocidade do tiro no eixo y
       tiro.setPosition(0, 0); //posiciona o tiro fora da tela
+    }
+  </script>
+
+  <script>
+    const elogios = [
+      "Criativa",
+      "Inteligente",
+      "Engraçada",
+      "Dedicada",
+      "Gentil",
+      "Brilhante",
+      "Carismática",
+      "Talentosa",
+      "Inspiradora",
+      "Excepcional"
+    ];
+
+    for (let i = 0; i < 10; i++) {
+      console.log(`A Kizzy é ${elogios[i]}`);
     }
   </script>
 </body>
