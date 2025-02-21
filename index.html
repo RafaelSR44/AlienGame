@@ -113,7 +113,7 @@
       inimigos = this.physics.add.sprite(larguraJogo / 4, alturaJogo / 2, 'inimigo');
       inimigos.setCollideWorldBounds(true);
       this.physics.add.collider(inimigos, plataforma);
-      inimigos.body.setAllowGravity(false);
+      // inimigos.body.setAllowGravity(false);
 
       // adicionando placar 
       placar = this.add.text(50, 50, 'Moedas:' + pontuacao, { fontSize: '45px', fill: '#495613' });
@@ -203,16 +203,16 @@
 
       // aqui verificamos se o inimigo está perto do player no eixo x, com isso ele em direção ao player
       if (inimigos.x < alien.x) {
-        inimigos.setVelocityX(50);
+        inimigos.setVelocityX(50 + pontuacao);
       } else {
-        inimigos.setVelocityX(-50);
+        inimigos.setVelocityX(-50 - pontuacao);
       }
 
       // aqui verificamos se o inimigo está perto do player no eixo y, com isso ele em direção ao player
       if (inimigos.y < alien.y) {
-        inimigos.setVelocityY(50);
+        inimigos.setVelocityY(50 + pontuacao);
       } else {
-        inimigos.setVelocityY(-50);
+        inimigos.setVelocityY(-50 - pontuacao);
       }
 
     }
